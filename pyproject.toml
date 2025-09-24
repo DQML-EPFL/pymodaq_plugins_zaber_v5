@@ -6,23 +6,21 @@ h5exporters = false  # true if plugin contains custom h5 file exporters
 scanners = false  # true if plugin contains custom scan layout (daq_scan extensions)
 
 [urls]
-package-url = 'https://github.com/PyMoDAQ/pymodaq_plugins_template' #todo modify url by your plugin url
+package-url = 'https://github.com/DQML-EPFL/pymodaq_plugins_zaber_v5'
 
 [project]
-name = "pymodaq_plugins_template" #todo modify template by your plugin short name
-description = 'some word about your plugin'
+name = "pymodaq_plugins_zaber_v5"
+description = 'A custom Zaber Plugin for compatibility with Pymodaq version 5'
 dependencies = [
     "pymodaq>=5.0.0",
-    #todo: list here all dependencies your package may have
 ]
 
 authors = [
-    {name = "Name Surname", email = "myname@test.fr"},
-    #todo: list here all authors of your plugin
+    {name = "Malo Hervé", email = "malo.herve@epfl.ch"},
 ]
+
 maintainers = [
-    {name = "Name Surname", email = "myname@test.fr"},
-    #todo: list here all maintainers of your plugin
+     {name = "Malo Hervé", email = "malo.herve@epfl.ch"},
 ]
 
 # nottodo: leave everything below as is!
