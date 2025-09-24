@@ -39,10 +39,10 @@ class DAQ_Move_Zaber(DAQ_Move_base):
     # # del params[index]['children'][index2]['limits']     # need to remove limits to avoid bug  # Malo Commented
 
 
-    # # # Override definition of units parameter to make it user-changeable
-    # index = next(i for i, item in enumerate(params) if item["name"] == "units")
-    # params[index]['readonly'] = False
-    # params[index]['type'] = 'list'
+    # # Override definition of units parameter to make it user-changeable
+    index = next(i for i, item in enumerate(params) if item["name"] == "units")
+    params[index]['readonly'] = False
+    params[index]['type'] = 'list'
 
 
 
@@ -50,7 +50,7 @@ class DAQ_Move_Zaber(DAQ_Move_base):
 
         super().__init__(parent, params_state)
         self.controller = None
-        self.unit = None
+        self.unit = Units.LENGTH_MILLIMETRES
 
 
 
@@ -77,9 +77,8 @@ class DAQ_Move_Zaber(DAQ_Move_base):
             # Create Controller
             try: device_list = Connection.open_serial_port(self.settings.child('com_port').value()).detect_devices()    # Try to connect to the controler
             except: raise ConnectionError('Could not connect to Zaber controller on the specified serial port.')
-
+    
             self.controller = device_list[0]
-            
 
             self.settings.child('controller_str').setValue(str(self.controller))
             
@@ -104,24 +103,15 @@ class DAQ_Move_Zaber(DAQ_Move_base):
         axis = self.controller.get_axis(1)  # Only one axis in this version
 
         # Name and ID
-        self.settings.child('stage_properties', 'stage_name').setValue(
-            axis.peripheral_name + ' (ID:' + str(axis.peripheral_id) + ')'
-        )
+        self.settings.child('stage_properties', 'stage_name').setValue(  axis.peripheral_name + ' (ID:' + str(axis.peripheral_id) + ')'  )
         # Type
-        self.settings.child('stage_properties', 'stage_type').setValue(
-            axis.axis_type.name
-        )
+        self.settings.child('stage_properties', 'stage_type').setValue( axis.axis_type.name )
 
-        self.settings.child('units').setReadonly(False)
-        if axis.axis_type.value == 1:  # LINEAR
+        if axis.axis_type.value == 1:           # LINEAR
             self.settings.child('units').setLimits(['m', 'cm', 'mm', 'µm', 'nm', 'in'])
             self.settings.child('units').setValue('mm')
             self.unit = Units.LENGTH_MILLIMETRES
 
-        elif axis.axis_type.value == 2:  # ROTARY
-            self.settings.child('units').setLimits(['deg', 'rad'])
-            self.settings.child('units').setValue('deg')
-            self.unit = Units.ANGLE_DEGREES
 
 
 
@@ -162,9 +152,7 @@ class DAQ_Move_Zaber(DAQ_Move_base):
             self.get_actuator_value()
 
         elif param.name() == 'units':
-            print("TUT")
             axis = self.controller.get_axis(1)
-
             epsilon_native_units = axis.settings.convert_to_native_units(
                 'pos', self.settings.child('epsilon').value(), self.unit)
 
