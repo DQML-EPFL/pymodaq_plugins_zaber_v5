@@ -21,28 +21,19 @@ class DAQ_Move_Zaber(DAQ_Move_base):
     _epsilon = 0.01
 
     params = [{'title': 'COM Port:', 'name': 'com_port', 'type': 'list', 'limits': ports, 'value': port},
-              {'title': 'Controller:', 'name': 'controller_str', 'type': 'str', 'value': ''},                     
-              {'title': 'Stage Properties:', 'name': 'stage_properties', 'type': 'group', 'children': [
-                  {'title': 'Stage Name:', 'name': 'stage_name', 'type': 'str', 'value': '', 'readonly': True},
-                  {'title': 'Stage Type:', 'name': 'stage_type', 'type': 'str', 'value': '', 'readonly': True},
+              {'title': 'Convert to Time:', 'name': 'convert_time', 'type': 'bool', 'value': False},
+              {'title': 'Stage Information:', 'name': 'stage_properties', 'type': 'group', 'children': [
+                  {'title': 'Controller:', 'name': 'controller_str', 'type': 'str', 'value': '', 'readonly': True},     # The controller Itself                    
+                  {'title': 'Stage Name:', 'name': 'stage_name', 'type': 'str', 'value': '', 'readonly': True},         # The Controller Name
+                  {'title': 'Stage Type:', 'name': 'stage_type', 'type': 'str', 'value': '', 'readonly': True},         # Linear or Rotation stage 
               ]}
-              ] + comon_parameters_fun(stage_names, epsilon=_epsilon)
-
-
-    # Since we have no way of knowing how many axes are attached to the controller,
-    # we modify axis to be an integer of any value instead of a list of strings.
-    # index = next(i for i, item in enumerate(params) if item["name"] == "multiaxes")
-    # index2 = next(i for i, item in enumerate(params[index]['children']) if item["name"] == "axis")
-    # params[index]['children'][index2]['type'] = 'int'   # override type
-    # params[index]['children'][index2]['value'] = 1
-    # params[index]['children'][index2]['default'] = 1
-    # # del params[index]['children'][index2]['limits']     # need to remove limits to avoid bug  # Malo Commented
+              ] + comon_parameters_fun(epsilon=_epsilon)
 
 
     # # Override definition of units parameter to make it user-changeable
-    index = next(i for i, item in enumerate(params) if item["name"] == "units")
-    params[index]['readonly'] = False
-    params[index]['type'] = 'list'
+    # index = next(i for i, item in enumerate(params) if item["name"] == "units")
+    # params[index]['readonly'] = False
+    # params[index]['type'] = 'list'
 
 
 
@@ -80,7 +71,7 @@ class DAQ_Move_Zaber(DAQ_Move_base):
     
             self.controller = device_list[0]
 
-            self.settings.child('controller_str').setValue(str(self.controller))
+            self.settings.child('stage_properties', 'controller_str').setValue(str(self.controller))
             
             self.update_axis()
 
@@ -111,6 +102,8 @@ class DAQ_Move_Zaber(DAQ_Move_base):
             self.settings.child('units').setLimits(['m', 'cm', 'mm', 'µm', 'nm', 'in'])
             self.settings.child('units').setValue('mm')
             self.unit = Units.LENGTH_MILLIMETRES
+        
+
 
 
 
@@ -217,6 +210,8 @@ class DAQ_Move_Zaber(DAQ_Move_base):
         ----------
         position: (flaot) value of the relative target positioning
         """
+        if self.settings.child('units').value() =='mm' : position*=1e3      #· TODO: Workaround since we have an order of magnitude problem
+
         position = (self.check_bound(self.current_value + position)
                 - self.current_value)
         self.target_position = position + self.current_value
